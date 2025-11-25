@@ -31,8 +31,14 @@ func NewCatalogHandler(r database.ProductsStore) *CatalogHandler {
 
 func (h *CatalogHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 	filter := database.ProductFilter{}
-
 	query := r.URL.Query()
+
+	category := query.Get("category")
+	if category != "" {
+		filter.Category = &category
+	}
+
+	priceLessThanStr := query.Get("priceLessThan")
 
 	strOffset := query.Get("offset")
 	strLimit := query.Get("limit")
@@ -48,6 +54,12 @@ func (h *CatalogHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 		if parsedLimit, err := strconv.ParseInt(strLimit, 10, 0); err == nil {
 			limit := int(parsedLimit)
 			filter.Limit = &limit
+		}
+	}
+
+	if priceLessThanStr != "" {
+		if parsedPrice, err := strconv.ParseFloat(priceLessThanStr, 64); err == nil {
+			filter.PriceLessThan = &parsedPrice
 		}
 	}
 

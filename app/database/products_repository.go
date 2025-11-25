@@ -10,8 +10,10 @@ type productsRepository struct {
 }
 
 type ProductFilter struct {
-	Offset *int
-	Limit  *int
+	Offset        *int
+	Limit         *int
+	Category      *string
+	PriceLessThan *float64
 }
 
 type ProductsStore interface {
@@ -54,6 +56,15 @@ func (r *productsRepository) GetAllProducts(filters ProductFilter) ([]models.Pro
 	query := r.db.
 		Preload("Variants").
 		Preload("ProductCategory")
+
+	if filters.Category != nil {
+		query = query.Joins("JOIN product_categories ON product_categories.product_id = products.id").
+			Where("product_categories.name = ?", *filters.Category)
+	}
+
+	if filters.PriceLessThan != nil {
+		query = query.Where("price < ?", *filters.PriceLessThan)
+	}
 
 	if err := query.Model(&models.Product{}).Count(&productCount).Error; err != nil {
 		return nil, nil, err
