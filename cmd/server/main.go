@@ -12,7 +12,6 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/mytheresa/go-hiring-challenge/app/catalog"
 	"github.com/mytheresa/go-hiring-challenge/app/database"
-	"github.com/mytheresa/go-hiring-challenge/models"
 )
 
 func main() {
@@ -34,9 +33,10 @@ func main() {
 	)
 	defer close()
 
+	productsRepo := database.NewProductsRepository(db)
+
 	// Initialize handlers
-	prodRepo := models.NewProductsRepository(db)
-	cat := catalog.NewCatalogHandler(prodRepo)
+	cat := catalog.NewCatalogHandler(productsRepo)
 
 	// Set up routing
 	mux := http.NewServeMux()
