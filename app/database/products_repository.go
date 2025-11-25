@@ -59,6 +59,10 @@ func (r *productsRepository) GetAllProducts(filters ProductFilter) ([]models.Pro
 		return nil, nil, err
 	}
 
+	if int64(offset) > productCount {
+		return []models.Product{}, &productCount, nil
+	}
+
 	if err := query.
 		Order("id ASC").
 		Offset(offset).
