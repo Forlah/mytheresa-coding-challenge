@@ -15,6 +15,7 @@ func NewCategoriesRepository(db *gorm.DB) *categoriesRepository {
 	}
 }
 
+//go:generate mockgen -source=categories_repository.go -destination=../mocks/categories_repository_mock.go -package=mocks
 type CategoriesStore interface {
 	GetAllCategories() ([]models.Category, error)
 	CreateCategory(category models.Category) (*models.Category, error)

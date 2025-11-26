@@ -3,10 +3,11 @@ package catalog
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
+	"github.com/google/uuid"
 	"github.com/mytheresa/go-hiring-challenge/app/api"
 	"github.com/mytheresa/go-hiring-challenge/app/database"
-	"github.com/mytheresa/go-hiring-challenge/models"
 )
 
 type Response struct {
@@ -14,17 +15,32 @@ type Response struct {
 	Total    *int64    `json:"total,omitempty"`
 }
 
+
+
 type Product struct {
-	Code     string  `json:"code"`
-	Price    float64 `json:"price"`
-	Category string  `json:"category"`
+	Code     string          `json:"code"`
+	Price    float64         `json:"price"`
+	Category ProductCategory `json:"category"`
 }
 
 type ProductDetail struct {
 	Code     string           `json:"code"`
 	Price    float64          `json:"price"`
-	Category string           `json:"category"`
-	Variants []models.Variant `json:"variants"`
+	Category ProductCategory  `json:"category"`
+	Variants []ProductVariant `json:"variants"`
+}
+
+type ProductVariant struct {
+	ID        uint    `json:"id"`
+	ProductID uint    `json:"product_id"`
+	Name      string  `json:"name"`
+	SKU       string  `json:"sku"`
+	Price     float64 `json:"price"`
+}
+
+type ProductCategory struct {
+	Code uuid.UUID `json:"code"`
+	Name string    `json:"name"`
 }
 
 type CatalogHandler struct {
@@ -113,9 +129,12 @@ func (h *CatalogHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 	products := make([]Product, len(res))
 	for i, p := range res {
 		products[i] = Product{
-			Code:     p.Code,
-			Price:    p.Price.InexactFloat64(),
-			Category: p.ProductCategory.Name,
+			Code:  p.Code,
+			Price: p.Price.InexactFloat64(),
+			Category: ProductCategory{
+				Code: p.ProductCategory.Code,
+				Name: p.ProductCategory.Name,
+			},
 		}
 	}
 
@@ -129,7 +148,8 @@ func (h *CatalogHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CatalogHandler) HandleGetByCode(w http.ResponseWriter, r *http.Request) {
-	code := r.PathValue("code")
+	path := strings.TrimPrefix(r.URL.Path, "/catalog/")
+	code := strings.Split(path, "/")[0]
 	if code == "" {
 		api.ErrorResponse(w, http.StatusBadRequest, "Product code is required")
 		return
@@ -149,10 +169,27 @@ func (h *CatalogHandler) HandleGetByCode(w http.ResponseWriter, r *http.Request)
 	}
 
 	response := ProductDetail{
-		Code:     product.Code,
-		Price:    product.Price.InexactFloat64(),
-		Category: product.ProductCategory.Name,
-		Variants: product.Variants,
+		Code:  product.Code,
+		Price: product.Price.InexactFloat64(),
+		Category: ProductCategory{
+			Code: product.ProductCategory.Code,
+			Name: product.ProductCategory.Name,
+		},
+		Variants: func() []ProductVariant {
+			variants := make([]ProductVariant, len(product.Variants))
+
+			for i, v := range product.Variants {
+				variants[i] = ProductVariant{
+					ID:        v.ID,
+					ProductID: v.ProductID,
+					Name:      v.Name,
+					SKU:       v.SKU,
+					Price:     v.Price.InexactFloat64(),
+				}
+			}
+
+			return variants
+		}(),
 	}
 
 	api.OKResponse(w, response)

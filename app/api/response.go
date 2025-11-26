@@ -5,6 +5,10 @@ import (
 	"net/http"
 )
 
+type ErrorAPIResponse struct {
+	Error string `json:"error"`
+}
+
 func OKResponse(w http.ResponseWriter, data any) {
 	statusCode := http.StatusOK
 

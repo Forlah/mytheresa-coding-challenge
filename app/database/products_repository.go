@@ -16,6 +16,7 @@ type ProductFilter struct {
 	PriceLessThan *float64
 }
 
+//go:generate mockgen -source=products_repository.go -destination=../mocks/products_repository_mock.go -package=mocks
 type ProductsStore interface {
 	GetAllProducts(filters ProductFilter) ([]models.Product, *int64, error)
 	GetProductByCode(code string) (*models.Product, error)
