@@ -6,6 +6,7 @@ import (
 
 	"github.com/mytheresa/go-hiring-challenge/app/api"
 	"github.com/mytheresa/go-hiring-challenge/app/database"
+	"github.com/mytheresa/go-hiring-challenge/models"
 )
 
 type Response struct {
@@ -17,6 +18,13 @@ type Product struct {
 	Code     string  `json:"code"`
 	Price    float64 `json:"price"`
 	Category string  `json:"category"`
+}
+
+type ProductDetail struct {
+	Code     string           `json:"code"`
+	Price    float64          `json:"price"`
+	Category string           `json:"category"`
+	Variants []models.Variant `json:"variants"`
 }
 
 type CatalogHandler struct {
@@ -83,6 +91,36 @@ func (h *CatalogHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 	response := Response{
 		Products: products,
 		Total:    count,
+	}
+
+	api.OKResponse(w, response)
+}
+
+func (h *CatalogHandler) HandleGetByCode(w http.ResponseWriter, r *http.Request) {
+	code := r.PathValue("code")
+	if code == "" {
+		api.ErrorResponse(w, http.StatusBadRequest, "Product code is required")
+		return
+	}
+
+	product, err := h.productsRepo.GetProductByCode(code)
+	if err != nil {
+		api.ErrorResponse(w, http.StatusNotFound, "Product not found")
+		return
+	}
+
+	for index, variant := range product.Variants {
+		// if variant price is zero, set it to the product price
+		if variant.Price.IsZero() {
+			product.Variants[index].Price = product.Price
+		}
+	}
+
+	response := ProductDetail{
+		Code:     product.Code,
+		Price:    product.Price.InexactFloat64(),
+		Category: product.ProductCategory.Name,
+		Variants: product.Variants,
 	}
 
 	api.OKResponse(w, response)
