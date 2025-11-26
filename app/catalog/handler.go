@@ -37,7 +37,7 @@ func NewCatalogHandler(r database.ProductsStore) *CatalogHandler {
 	}
 }
 
-func (h *CatalogHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
+func (h *CatalogHandler) buildProductFilter(r *http.Request) database.ProductFilter {
 	filter := database.ProductFilter{}
 	query := r.URL.Query()
 
@@ -70,6 +70,12 @@ func (h *CatalogHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 			filter.PriceLessThan = &parsedPrice
 		}
 	}
+
+	return filter
+}
+
+func (h *CatalogHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
+	filter := h.buildProductFilter(r)
 
 	res, count, err := h.productsRepo.GetAllProducts(filter)
 	if err != nil {

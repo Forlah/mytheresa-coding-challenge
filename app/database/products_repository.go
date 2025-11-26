@@ -19,6 +19,7 @@ type ProductFilter struct {
 type ProductsStore interface {
 	GetAllProducts(filters ProductFilter) ([]models.Product, *int64, error)
 	GetProductByCode(code string) (*models.Product, error)
+	GetProductByID(id uint) (*models.Product, error)
 }
 
 func NewProductsRepository(db *gorm.DB) *productsRepository {
@@ -92,6 +93,17 @@ func (r *productsRepository) GetProductByCode(code string) (*models.Product, err
 		Preload("Variants").
 		Preload("ProductCategory").
 		Where("code = ?", code).
+		First(&product).Error; err != nil {
+		return nil, err
+	}
+
+	return &product, nil
+}
+
+func (r *productsRepository) GetProductByID(id uint) (*models.Product, error) {
+	var product models.Product
+	if err := r.db.
+		Where("id = ?", id).
 		First(&product).Error; err != nil {
 		return nil, err
 	}
