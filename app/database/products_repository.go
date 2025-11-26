@@ -29,28 +29,28 @@ func NewProductsRepository(db *gorm.DB) *productsRepository {
 }
 
 func (r *productsRepository) GetAllProducts(filters ProductFilter) ([]models.Product, *int64, error) {
-	const (
-		maxLimit     = 100
-		minLimit     = 1
-		defaultLimit = 10
-	)
+	// const (
+	// 	maxLimit     = 100
+	// 	minLimit     = 1
+	// 	defaultLimit = 10
+	// )
 
-	offset := 0
-	limit := defaultLimit
+	// offset := 0
+	// limit := defaultLimit
 
-	if filters.Offset != nil {
-		offset = *filters.Offset
-	}
+	// if filters.Offset != nil {
+	// 	offset = *filters.Offset
+	// }
 
-	if filters.Limit != nil {
-		limit = *filters.Limit
-	}
+	// if filters.Limit != nil {
+	// 	limit = *filters.Limit
+	// }
 
-	if limit > maxLimit {
-		limit = maxLimit
-	} else if limit < 0 {
-		limit = minLimit
-	}
+	// if limit > maxLimit {
+	// 	limit = maxLimit
+	// } else if limit < 0 {
+	// 	limit = minLimit
+	// }
 
 	var products []models.Product
 	var productCount int64
@@ -72,14 +72,14 @@ func (r *productsRepository) GetAllProducts(filters ProductFilter) ([]models.Pro
 		return nil, nil, err
 	}
 
-	if int64(offset) > productCount {
+	if int64(*filters.Offset) > productCount {
 		return []models.Product{}, &productCount, nil
 	}
 
 	if err := query.
 		Order("id ASC").
-		Offset(offset).
-		Limit(limit).
+		Offset(*filters.Offset).
+		Limit(*filters.Limit).
 		Find(&products).Error; err != nil {
 		return nil, nil, err
 	}

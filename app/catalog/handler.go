@@ -71,6 +71,32 @@ func (h *CatalogHandler) buildProductFilter(r *http.Request) database.ProductFil
 		}
 	}
 
+	const (
+		maxLimit     = 100
+		minLimit     = 1
+		defaultLimit = 10
+	)
+
+	offset := 0
+	limit := defaultLimit
+
+	if filter.Offset != nil {
+		offset = *filter.Offset
+	}
+
+	if filter.Limit != nil {
+		limit = *filter.Limit
+	}
+
+	if limit > maxLimit {
+		limit = maxLimit
+	} else if limit < 0 {
+		limit = minLimit
+	}
+
+	filter.Offset = &offset
+	filter.Limit = &limit
+
 	return filter
 }
 
