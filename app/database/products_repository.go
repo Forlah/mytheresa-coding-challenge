@@ -30,29 +30,6 @@ func NewProductsRepository(db *gorm.DB) *productsRepository {
 }
 
 func (r *productsRepository) GetAllProducts(filters ProductFilter) ([]models.Product, *int64, error) {
-	// const (
-	// 	maxLimit     = 100
-	// 	minLimit     = 1
-	// 	defaultLimit = 10
-	// )
-
-	// offset := 0
-	// limit := defaultLimit
-
-	// if filters.Offset != nil {
-	// 	offset = *filters.Offset
-	// }
-
-	// if filters.Limit != nil {
-	// 	limit = *filters.Limit
-	// }
-
-	// if limit > maxLimit {
-	// 	limit = maxLimit
-	// } else if limit < 0 {
-	// 	limit = minLimit
-	// }
-
 	var products []models.Product
 	var productCount int64
 
