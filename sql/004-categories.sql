@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS product_categories (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL REFERENCES products (id) ON DELETE CASCADE,
+    code UUID NOT NULL,
+    name VARCHAR(60) NOT NULL
+);
